@@ -5,6 +5,7 @@ package plugins
 import (
 	"github.com/newrelic/infrastructure-agent/pkg/entity"
 	"reflect"
+	"unicode"
 
 	"github.com/newrelic/infrastructure-agent/pkg/log"
 	"github.com/sirupsen/logrus"
@@ -48,6 +49,16 @@ func (ac *AgentConfigPlugin) Run() {
 	value := reflect.ValueOf(ac.config)
 	for i := 0; i < value.NumField(); i++ {
 		name := value.Type().Field(i).Name
+
+		// serialise only public fields
+		if len(name) <= 0 {
+			continue
+		}
+		firstLetter := rune(name[0])
+		if unicode.IsLower(firstLetter) {
+			continue
+		}
+
 		switch name {
 		case "FilesConfigOn", "DebugLogSec", "OfflineLoggingMode":
 			continue
